@@ -107,3 +107,14 @@ class Player(pygame.sprite.Sprite):
                     self.rect.top = hit.rect.bottom
                 # Atualiza a posição vetorial (float) com base na posição do rect (int)
                 self.pos.y = self.rect.y
+    
+    def collect_power_up(self, power_up_type):
+        """
+        Aplica o efeito de um power-up ao jogador.
+        """
+        if power_up_type == 'bomb_up':
+            self.bomb_limit += 1
+            print(f"Jogador coletou BOMBA EXTRA! Limite atual: {self.bomb_limit}")
+        elif power_up_type == 'fire_up':
+            self.bomb_range += 1
+            print(f"Jogador coletou FOGO EXTRA! Alcance atual: {self.bomb_range}")

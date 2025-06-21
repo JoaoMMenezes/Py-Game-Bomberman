@@ -42,14 +42,15 @@ class GameManager:
         player1_keys = {"up": pygame.K_UP, "down": pygame.K_DOWN, "left": pygame.K_LEFT, "right": pygame.K_RIGHT, "bomb": pygame.K_SPACE}
         player2_keys = {"up": pygame.K_w, "down": pygame.K_s, "left": pygame.K_a, "right": pygame.K_d, "bomb": pygame.K_e}
 
-        # Grupos de Sprites
+         # Grupos de Sprites
         self.all_sprites = pygame.sprite.Group()
         self.players = pygame.sprite.Group()
         self.walls = pygame.sprite.Group()
         self.boxes = pygame.sprite.Group()
         self.bombs = pygame.sprite.Group()
         self.explosions = pygame.sprite.Group()
-        
+        self.power_ups = pygame.sprite.Group()
+
         self.solid_obstacles = pygame.sprite.Group()
 
         self.create_map()
@@ -110,12 +111,23 @@ class GameManager:
 
     def update(self):
         self.all_sprites.update()
-        pygame.sprite.groupcollide(self.explosions, self.boxes, True, True) # Explosão destrói caixa
         
+        # Colisão entre explosões e caixas (destrói as caixas)
+        # CORREÇÃO APLICADA AQUI: troquei explosions por boxes, e vice-versa, para melhor legibilidade
+        pygame.sprite.groupcollide(self.boxes, self.explosions, True, False)
+        
+        # Colisão entre explosões e jogadores (mata os jogadores)
         for player in self.players:
             hits = pygame.sprite.spritecollide(player, self.explosions, False)
             if hits:
                 player.kill()
+
+        # Colisão entre jogadores e power-ups
+        # AQUI ESTÁ A CORREÇÃO PRINCIPAL: trocado self.game.power_ups por self.power_ups
+        player_powerup_hits = pygame.sprite.groupcollide(self.players, self.power_ups, False, True)
+        for player, powerup_list in player_powerup_hits.items():
+            for powerup in powerup_list:
+                player.collect_power_up(powerup.type)
 
     def draw(self):
         self.screen.fill((107, 142, 35))
