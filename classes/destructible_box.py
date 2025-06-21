@@ -22,8 +22,8 @@ class DestructibleBox(pygame.sprite.Sprite):
         """
         Sobrescreve o método kill para ter a chance de criar um power-up.
         """
-        # Chance de 40% de dropar um power-up
-        if random.random() < 0.4:
+        # Chance de 20% de dropar um power-up
+        if random.random() < 0.2:
             # Escolhe aleatoriamente entre os dois tipos de power-up
             power_up_type = random.choice(['bomb_up', 'fire_up'])
             
