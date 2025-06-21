@@ -1,8 +1,10 @@
 [
-  {
-    "player_name": "Player1",
-    "games_played": 5,
-    "games_won": 3,
-    "games_lost": 2
-  }
+    {
+        "name": "Jogador 1",
+        "wins": 4
+    },
+    {
+        "name": "Jogador 2",
+        "wins": 1
+    }
 ]

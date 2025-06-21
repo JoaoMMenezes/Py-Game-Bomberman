@@ -4,9 +4,10 @@ import pygame
 from classes.bomb import Bomb
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, game, x, y, color, keys):
+    def __init__(self, game, x, y, color, keys, name):
         super().__init__()
         self.game = game
+        self.name = name
         self.tile_size = game.tile_size
         self.image = pygame.Surface((self.tile_size * 0.9, self.tile_size * 0.9))
         self.image.fill(pygame.Color(color))

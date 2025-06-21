@@ -2,12 +2,13 @@
 
 import pygame
 import sys
-from classes.player import Player
 from classes.wall import Wall
+from classes.player import Player
+from manager.db_manager import DBManager
 from classes.destructible_box import DestructibleBox
 
 class GameManager:
-    def __init__(self, screen, tile_size):
+    def __init__(self, screen, tile_size, player1_name, player2_name):
         self.screen = screen
         self.tile_size = tile_size
         self.clock = pygame.time.Clock()
@@ -60,8 +61,8 @@ class GameManager:
         # Posição inicial do Jogador 2 (canto oposto)
         p2_x, p2_y = self.grid_width - 2, self.grid_height - 2
 
-        self.player1 = Player(self, p1_x, p1_y, 'blue', player1_keys)
-        self.player2 = Player(self, p2_x, p2_y, 'red', player2_keys)
+        self.player1 = Player(self, p1_x, p1_y, 'blue', player1_keys, player1_name)
+        self.player2 = Player(self, p2_x, p2_y, 'red', player2_keys, player2_name)
         
         self.all_sprites.add(self.player1, self.player2)
         self.players.add(self.player1, self.player2)
@@ -89,11 +90,62 @@ class GameManager:
                     self.solid_obstacles.add(box)
 
     def run(self):
+        """ Loop principal do jogo. Encerra quando resta um ou nenhum jogador. """
+        winner = None
         while self.running:
             self.dt = self.clock.tick(60) / 1000.0
             self.events()
             self.update()
             self.draw()
+
+            # CONDIÇÃO DE FIM DE JOGO
+            if len(self.players) <= 1:
+                if len(self.players) == 1:
+                    winner = self.players.sprites()[0]
+                    # NOVO: Atualiza o ranking quando há um vencedor
+                    db = DBManager()
+                    db.update_ranking(winner.name)
+                self.running = False
+        
+        # Após o loop do jogo, exibe a tela de vencedor
+        self.show_winner_screen(winner)
+
+    def show_winner_screen(self, winner):
+        """ Exibe uma tela anunciando o vencedor e aguarda um input para voltar ao menu. """
+        # ... (código para criar as fontes e textos continua o mesmo)
+        font = pygame.font.Font(pygame.font.get_default_font(), 50)
+        small_font = pygame.font.Font(pygame.font.get_default_font(), 24)
+
+        if winner:
+            text = f"Vencedor: {winner.name}!"
+        else:
+            text = "Empate!"
+        
+        text_surface = font.render(text, True, pygame.Color('white'))
+        text_rect = text_surface.get_rect(center=(self.screen.get_width() / 2, self.screen.get_height() / 2 - 50))
+        
+        prompt_surface = small_font.render("Pressione qualquer tecla para voltar ao menu", True, pygame.Color('white'))
+        prompt_rect = prompt_surface.get_rect(center=(self.screen.get_width() / 2, self.screen.get_height() / 2 + 50))
+
+        # Loop da tela de vencedor
+        waiting = True
+        while waiting:
+            for event in pygame.event.get():
+                # Se o usuário fechar a janela, o jogo deve parar completamente
+                if event.type == pygame.QUIT:
+                    # CORREÇÃO: Apenas encerra todos os loops
+                    waiting = False
+                    self.running = False # Garante que o loop anterior não continue
+                    # Removemos pygame.quit() e sys.exit() daqui
+                    
+                # Se o usuário pressionar uma tecla, apenas o loop da tela de vencedor para
+                if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                    waiting = False
+            
+            self.screen.fill(pygame.Color('black'))
+            self.screen.blit(text_surface, text_rect)
+            self.screen.blit(prompt_surface, prompt_rect)
+            pygame.display.flip()
 
     def events(self):
         for event in pygame.event.get():
