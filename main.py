@@ -1,5 +1,7 @@
+# main.py
+
 import pygame
-from manager.game_manager import GameManager
+from classes.menu import Menu # Alterado de GameManager para Menu
 
 def main():
     """
@@ -13,11 +15,11 @@ def main():
     grid_height = 13
     screen_size = (grid_width * tile_size, grid_height * tile_size)
     screen = pygame.display.set_mode(screen_size)
-    pygame.display.set_caption("Bomberman - 2 Players")
+    pygame.display.set_caption("Bomberman - Menu")
 
-    # Cria uma instância do gerenciador do jogo e inicia o loop principal
-    game_manager = GameManager(screen, tile_size)
-    game_manager.run()
+    # Cria uma instância do Menu e inicia seu loop principal
+    menu = Menu(screen)
+    menu.run()
 
     pygame.quit()
 
