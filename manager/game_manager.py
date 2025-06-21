@@ -1,0 +1,123 @@
+# manager/game_manager.py
+
+import pygame
+import sys
+from classes.player import Player
+from classes.wall import Wall
+from classes.destructible_box import DestructibleBox
+
+class GameManager:
+    def __init__(self, screen, tile_size):
+        self.screen = screen
+        self.tile_size = tile_size
+        self.clock = pygame.time.Clock()
+        self.running = True
+
+        # Define as dimensões do grid para fácil referência
+        self.grid_width = 13
+        self.grid_height = 13
+        
+        # Mapa do jogo (0=vazio, 1=muro, 2=caixa destrutível)
+        self.grid = [
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 1],
+            [1, 0, 1, 2, 1, 2, 1, 2, 1, 2, 1, 0, 1],
+            [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+            [1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1],
+            [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+            [1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1],
+            [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+            [1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 0, 1],
+            [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 1],
+            [1, 0, 1, 2, 1, 2, 1, 2, 1, 2, 1, 0, 1],
+            [1, 0, 0, 2, 2, 2, 2, 2, 2, 2, 0, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        ]
+
+        # Garante que as áreas de spawn estejam limpas (valor 0)
+        self.clear_spawn_area(1, 1)
+        self.clear_spawn_area(self.grid_width - 2, self.grid_height - 2)
+
+        # Controles dos jogadores
+        player1_keys = {"up": pygame.K_UP, "down": pygame.K_DOWN, "left": pygame.K_LEFT, "right": pygame.K_RIGHT, "bomb": pygame.K_SPACE}
+        player2_keys = {"up": pygame.K_w, "down": pygame.K_s, "left": pygame.K_a, "right": pygame.K_d, "bomb": pygame.K_e}
+
+        # Grupos de Sprites
+        self.all_sprites = pygame.sprite.Group()
+        self.players = pygame.sprite.Group()
+        self.walls = pygame.sprite.Group()
+        self.boxes = pygame.sprite.Group()
+        self.bombs = pygame.sprite.Group()
+        self.explosions = pygame.sprite.Group()
+        
+        self.solid_obstacles = pygame.sprite.Group()
+
+        self.create_map()
+
+        # Posição inicial do Jogador 1
+        p1_x, p1_y = 1, 1
+        # Posição inicial do Jogador 2 (canto oposto)
+        p2_x, p2_y = self.grid_width - 2, self.grid_height - 2
+
+        self.player1 = Player(self, p1_x, p1_y, 'blue', player1_keys)
+        self.player2 = Player(self, p2_x, p2_y, 'red', player2_keys)
+        
+        self.all_sprites.add(self.player1, self.player2)
+        self.players.add(self.player1, self.player2)
+
+    def clear_spawn_area(self, x, y):
+        """Define os quadrados ao redor de (x, y) como vazios (0)."""
+        self.grid[y][x] = 0
+        if x + 1 < self.grid_width - 1:
+            self.grid[y][x+1] = 0
+        if y + 1 < self.grid_height - 1:
+            self.grid[y+1][x] = 0
+
+    def create_map(self):
+        for j, row in enumerate(self.grid):
+            for i, tile in enumerate(row):
+                if tile == 1:
+                    wall = Wall(self, i, j)
+                    self.all_sprites.add(wall)
+                    self.walls.add(wall)
+                    self.solid_obstacles.add(wall)
+                elif tile == 2:
+                    box = DestructibleBox(self, i, j)
+                    self.all_sprites.add(box)
+                    self.boxes.add(box)
+                    self.solid_obstacles.add(box)
+
+    def run(self):
+        while self.running:
+            self.dt = self.clock.tick(60) / 1000.0
+            self.events()
+            self.update()
+            self.draw()
+
+    def events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if self.player1.alive:
+                    if event.key == self.player1.keys["bomb"]:
+                        self.player1.plant_bomb()
+                if self.player2.alive:
+                    if event.key == self.player2.keys["bomb"]:
+                        self.player2.plant_bomb()
+
+    def update(self):
+        self.all_sprites.update()
+        pygame.sprite.groupcollide(self.explosions, self.boxes, True, True) # Explosão destrói caixa
+        
+        for player in self.players:
+            hits = pygame.sprite.spritecollide(player, self.explosions, False)
+            if hits:
+                player.kill()
+
+    def draw(self):
+        self.screen.fill((107, 142, 35))
+        self.all_sprites.draw(self.screen)
+        pygame.display.flip()
