@@ -4,19 +4,18 @@ import pygame
 import random
 from classes.power_up import PowerUp
 
+
 class DestructibleBox(pygame.sprite.Sprite):
-    """
-    Representa uma caixa destrutível que pode dropar um power-up.
-    """
     def __init__(self, game, x, y):
         super().__init__()
         self.game = game
         self.tile_size = game.tile_size
-        self.image = pygame.Surface((self.tile_size, self.tile_size))
-        self.image.fill(pygame.Color('saddlebrown')) # Uma cor diferente para a caixa
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (x * self.tile_size, y * self.tile_size)
-        self.grid_pos = (x, y) # Salva a posição no grid
+
+        self.image = self.game.images['box']
+        self.rect = self.image.get_rect(topleft=(x * self.tile_size, y * self.tile_size))
+        self.grid_pos = (x, y)
+
+    # kill() permanece o mesmo para spawn de PowerUp
 
     def kill(self):
         """

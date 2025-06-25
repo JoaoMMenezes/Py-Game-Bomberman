@@ -40,22 +40,16 @@ class Explosion:
                     break
 
 class ExplosionSector(pygame.sprite.Sprite):
-    """
-    Representa um único tile de fogo da explosão.
-    """
     def __init__(self, game, x, y):
         super().__init__()
         self.game = game
         self.tile_size = game.tile_size
-        self.image = pygame.Surface((self.tile_size, self.tile_size))
-        self.image.fill(pygame.Color('orange'))
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (x * self.tile_size, y * self.tile_size)
-        
-        self.duration = 500 # Meio segundo
+        self.image = self.game.images['explosion']
+        self.rect = self.image.get_rect(topleft=(x * self.tile_size, y * self.tile_size))
+        self.duration = 500
         self.creation_time = pygame.time.get_ticks()
 
     def update(self):
-        current_time = pygame.time.get_ticks()
-        if current_time - self.creation_time > self.duration:
-            self.kill() # O setor da explosão desaparece
+        # se já passou da duração, remove o setor de explosão
+        if pygame.time.get_ticks() - self.creation_time > self.duration:
+            self.kill()

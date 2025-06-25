@@ -1,10 +1,14 @@
 [
     {
         "name": "Jogador 1",
-        "wins": 4
+        "wins": 26
     },
     {
         "name": "Jogador 2",
-        "wins": 1
+        "wins": 4
+    },
+    {
+        "name": "caio cesar",
+        "wins": 2
     }
 ]

@@ -1,23 +1,23 @@
 # classes/bomb.py
 
-import pygame
+
 from classes.explosion import Explosion
+import pygame
 
 class Bomb(pygame.sprite.Sprite):
     def __init__(self, game, x, y, range, bomber):
         super().__init__()
         self.game = game
         self.tile_size = game.tile_size
-        self.image = pygame.Surface((self.tile_size, self.tile_size), pygame.SRCALPHA) # SRCALPHA para fundo transparente
-        # Desenha a bomba (círculo preto com detalhe vermelho)
-        pygame.draw.circle(self.image, pygame.Color('black'), (self.tile_size // 2, self.tile_size // 2), self.tile_size // 2)
-        pygame.draw.circle(self.image, pygame.Color('red'), (self.tile_size // 2, self.tile_size // 2), self.tile_size // 4)
 
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (x * self.tile_size, y * self.tile_size)
-        
+        # Usa a sprite em vez de desenhar
+        self.image = self.game.images['bomb']
+        self.rect = self.image.get_rect(topleft=(x * self.tile_size, y * self.tile_size))
+
         self.bomber = bomber
         self.range = range
+        # … restante igual …
+
         
         self.fuse_time = 3000
         self.creation_time = pygame.time.get_ticks()
